@@ -613,11 +613,12 @@ const sheets = sheetsRaw.reduce((a, s) => {
 		)]
 	,[])]
 },[])
-let winrar = undefined;
+let winrar = [];
+let lastWinrar = undefined;
 let attempts = 0
 let num = 0;
 console.info("Ok lets start")
-while (attempts < order.length && !winrar) {
+while (attempts < order.length && winrar.length < sheets.length) {
 	num = +order[attempts]
 	console.info('Next number is... ' + num)
 	sheets.forEach(s => {
@@ -627,7 +628,13 @@ while (attempts < order.length && !winrar) {
 			}
 		})
 	})
-	const winners = sheets.filter(s => {
+	const winnerIndex = [];
+	const newWinner = [];
+	 sheets.forEach((s, i) => {
+if (winrar.includes(i)) {
+	winnerIndex.push(i);
+	return;
+}
 		const v = {};
 		const h = {};
 		s.forEach(b => {
@@ -637,22 +644,26 @@ while (attempts < order.length && !winrar) {
 			}
 		})
 		if (Object.values(v).find(val => val >= 5)){
-			console.info({v})
+			winnerIndex.push(i);
+			newWinner.push(s);
+			console.info('sheet with index ' + i + ' winrars')
 			return true
 		}
 		if (Object.values(h).find(val => val >= 5)){
-			console.info({h})
+			winnerIndex.push(i);
+			newWinner.push(s);
+			console.info('sheet with index ' + i + ' winrars')
 			 return true
 		}
 		return false;
 	})
-	if (winners.length) {
-		winrar = winners;
-	}
+		lastWinrar = newWinner;
+		winrar = winnerIndex
 	attempts++;
 }
 
-if (winrar.length > 1) throw new Error('too much winrar')
-console.info('winrar', winrar[0])
-const left = winrar[0].reduce((a, b) => b.c ? a : a+b.value, 0);
+if (lastWinrar.length > 1) throw new Error('too much winrar')
+console.info('winrar', lastWinrar[0])
+console.info('total (sheets, winrar)', sheets.length, winrar.length)
+const left = lastWinrar[0].reduce((a, b) => b.c ? a : a+b.value, 0);
 console.info('sollution', {left, answer: left * num})
